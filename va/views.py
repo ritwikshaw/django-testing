@@ -15,6 +15,7 @@ from va.models import (
     Cpu,
     Gpu,
     Ram,
+    OrderItem,
 )
 from va.serializers import (
     postSerializer,
@@ -37,6 +38,11 @@ class RegisterApi(generics.GenericAPIView):
             "user": UserSerializer(user,    context=self.get_serializer_context()).data,
             "message": "User Created Successfully.  Now perform Login to get your token",
         })
+
+
+class GetUserView(RetrieveAPIView):
+    queryset = UserAccount.objects.all()
+    serializer_class = UserSerializer
 
 
 class PostListView(ListAPIView):
@@ -62,6 +68,8 @@ class PostDeleteView(DestroyAPIView):
 
 
 class SearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         slug = request.data.get('slug')
         if slug is None:
@@ -79,5 +87,21 @@ class SearchView(APIView):
                     key=lambda instance: instance.pk,
                     reverse=True)
         self.count = len(qs)  # since qs is actually a list
-        print(qs)
+        for q in qs:
+            order_item_qs = OrderItem.objects.filter(
+                object_id=q.id,
+                user=request.user,
+            )
+            if order_item_qs.exists():
+                order_item = order_item_qs.first()
+                order_item.quantity += 1
+                order_item.save()
+            else:
+                order_item = OrderItem.objects.create(
+                    content_object=q,
+                    user=request.user,
+                )
+                order_item.save()
+
         return JsonResponse(serializers.serialize('json', qs), safe=False)
+        # return Response(status=HTTP_200_OK)

@@ -8,10 +8,12 @@ from .views import (
     PostUpdateView,
     PostDeleteView,
     SearchView,
+    GetUserView,
 )
 
 urlpatterns = [
     path('register/', RegisterApi.as_view()),
+    path('getuser/<pk>', GetUserView.as_view()),
     path('postlist/', PostListView.as_view()),
     path('post-create/', PostCreateView.as_view()),
     path('post-update/<pk>', PostUpdateView.as_view()),

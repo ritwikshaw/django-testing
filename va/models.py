@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.db import models
 from django.db.models import Q
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
@@ -82,11 +84,31 @@ class Post(models.Model):
         return self.title
 
 
+class OrderItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    # item = models.ForeignKey(
+    #     Cpu, on_delete=models.CASCADE, blank=True, null=True)
+    # product = models.ForeignKey(
+    #     Gpu, on_delete=models.CASCADE, blank=True, null=True)
+    # product2 = models.ForeignKey(
+    #     Ram, on_delete=models.CASCADE, blank=True, null=True)
+    quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.user.first_name
+
+
 class Cpu(models.Model):
     title = models.CharField(max_length=30)
     specs = models.CharField(max_length=30)
     slug = models.SlugField()
     objects = CpuManager()
+    orderitem = GenericRelation(
+        OrderItem, related_query_name='cpu')
 
     def __str__(self):
         return self.title
@@ -97,6 +119,8 @@ class Gpu(models.Model):
     specs = models.CharField(max_length=30)
     slug = models.SlugField()
     objects = CpuManager()
+    orderitem = GenericRelation(
+        OrderItem, related_query_name='gpu')
 
     def __str__(self):
         return self.title
@@ -107,6 +131,8 @@ class Ram(models.Model):
     specs = models.CharField(max_length=30)
     slug = models.SlugField()
     objects = CpuManager()
+    orderitem = GenericRelation(
+        OrderItem, related_query_name='ram')
 
     def __str__(self):
         return self.title
