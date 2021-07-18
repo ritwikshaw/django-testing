@@ -2,7 +2,7 @@ from rest_framework import serializers
 # Register serializer
 from va.models import UserAccount
 from va.models import Post
-from va.models import (Cpu, Gpu, Ram)
+from va.models import (Cpu, Gpu, Ram, Custom)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -48,3 +48,15 @@ class ramSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ram
         fields = ('id', 'specs', 'title', 'slug')
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Custom
+        fields = ('id', 'cpu', 'user', 'ram', 'gpu',)
+
+    def get_item(self, obj):
+        return cpuSerializer(obj.cpu).data
+
+    def get_final_price(self, obj):
+        return obj.get_total_item_price()

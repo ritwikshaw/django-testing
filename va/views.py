@@ -2,8 +2,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.core import serializers
 from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from itertools import chain
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -16,14 +18,13 @@ from va.models import (
     Gpu,
     Ram,
     OrderItem,
+    Custom,
 )
 from va.serializers import (
     postSerializer,
     RegisterSerializer,
     UserSerializer,
-    cpuSerializer,
-    gpuSerializer,
-    ramSerializer,
+    OrderSerializer,
 )
 
 
@@ -105,3 +106,66 @@ class SearchView(APIView):
 
         return JsonResponse(serializers.serialize('json', qs), safe=False)
         # return Response(status=HTTP_200_OK)
+
+
+class CreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        order_item = Custom.objects.create(
+            user=request.user,
+        )
+        order_item.save()
+
+        return Response(status=HTTP_200_OK)
+
+
+class AddCpuView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        order = Custom.objects.get(user=self.request.user)
+        slug = request.data.get('slug')
+        cpu = get_object_or_404(Cpu, slug=slug)
+        order.cpu = cpu
+        order.save()
+
+        return Response(status=HTTP_200_OK)
+
+
+class AddGpuView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        order = Custom.objects.get(user=self.request.user)
+        slug = request.data.get('slug')
+        gpu = get_object_or_404(Gpu, slug=slug)
+        order.gpu = gpu
+        order.save()
+
+        return Response(status=HTTP_200_OK)
+
+
+class AddRamView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        order = Custom.objects.get(user=self.request.user)
+        slug = request.data.get('slug')
+        ram = get_object_or_404(Ram, slug=slug)
+        order.ram = ram
+        order.save()
+
+        return Response(status=HTTP_200_OK)
+
+
+class OrderDetailView(RetrieveAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        try:
+            order = Custom.objects.get(user=self.request.user)
+            return order
+        except ObjectDoesNotExist:
+            return Response("You do not have an active order")

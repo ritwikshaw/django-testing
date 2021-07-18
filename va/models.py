@@ -5,6 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.db.models.fields.related import ForeignKey
 
 
 class QuerySet(models.QuerySet):
@@ -106,6 +107,7 @@ class Cpu(models.Model):
     title = models.CharField(max_length=30)
     specs = models.CharField(max_length=30)
     slug = models.SlugField()
+    price = models.FloatField()
     objects = CpuManager()
     orderitem = GenericRelation(
         OrderItem, related_query_name='cpu')
@@ -118,6 +120,7 @@ class Gpu(models.Model):
     title = models.CharField(max_length=30)
     specs = models.CharField(max_length=30)
     slug = models.SlugField()
+    price = models.FloatField()
     objects = CpuManager()
     orderitem = GenericRelation(
         OrderItem, related_query_name='gpu')
@@ -130,9 +133,24 @@ class Ram(models.Model):
     title = models.CharField(max_length=30)
     specs = models.CharField(max_length=30)
     slug = models.SlugField()
+    price = models.FloatField()
     objects = CpuManager()
     orderitem = GenericRelation(
         OrderItem, related_query_name='ram')
 
     def __str__(self):
         return self.title
+
+
+class Custom(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    cpu = models.ForeignKey(
+        Cpu, on_delete=models.SET_NULL, blank=True, null=True)
+    gpu = models.ForeignKey(
+        Gpu, on_delete=models.SET_NULL, blank=True, null=True)
+    ram = models.ForeignKey(
+        Ram, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def get_total_item_price(self):
+        return self.cpu.price + self.gpu.price + self.ram.price
