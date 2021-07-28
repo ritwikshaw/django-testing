@@ -19,12 +19,14 @@ from va.models import (
     Ram,
     OrderItem,
     Custom,
+    Gamingpc,
 )
 from va.serializers import (
     postSerializer,
     RegisterSerializer,
     UserSerializer,
     OrderSerializer,
+    gamingpcSerializer,
 )
 
 
@@ -169,3 +171,8 @@ class OrderDetailView(RetrieveAPIView):
             return order
         except ObjectDoesNotExist:
             return Response("You do not have an active order")
+
+
+class PcListView(ListAPIView):
+    queryset = Gamingpc.objects.all()
+    serializer_class = gamingpcSerializer

@@ -14,6 +14,7 @@ from .views import (
     AddGpuView,
     AddRamView,
     OrderDetailView,
+    PcListView,
 )
 
 urlpatterns = [
@@ -29,4 +30,5 @@ urlpatterns = [
     path('add-gpu/', AddGpuView.as_view()),
     path('add-ram/', AddRamView.as_view()),
     path('order/', OrderDetailView.as_view()),
+    path('gamingpc/', PcListView.as_view()),
 ]

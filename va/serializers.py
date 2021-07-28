@@ -2,7 +2,7 @@ from rest_framework import serializers
 # Register serializer
 from va.models import UserAccount
 from va.models import Post
-from va.models import (Cpu, Gpu, Ram, Custom)
+from va.models import (Cpu, Gpu, Ram, Custom, Gamingpc, Pcpart, Pcprice, Pcdes)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -60,3 +60,41 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_final_price(self, obj):
         return obj.get_total_item_price()
+
+
+class PcpartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pcpart
+        fields = ('id', 'name', 'wifi', 'blutooth', 'vr', 'stream')
+
+
+class PcpriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pcprice
+        fields = ('id', 'name', 'price', 'qua', 'ava')
+
+
+class PcdesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pcdes
+        fields = ('id', 'des1', 'des2')
+
+
+class gamingpcSerializer(serializers.ModelSerializer):
+    part = serializers.SerializerMethodField()
+    des = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Gamingpc
+        fields = ('id', 'name', 'cpu', 'gpu', 'ram',
+                  'des', 'price', 'part')
+
+    def get_part(self, obj):
+        return PcpartSerializer(obj.part).data
+
+    def get_des(self, obj):
+        return PcdesSerializer(obj.des).data
+
+    def get_price(self, obj):
+        return PcpriceSerializer(obj.price).data

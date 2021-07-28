@@ -5,6 +5,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.db.models.fields import CharField
+from django.db.models.fields.files import ImageField
 from django.db.models.fields.related import ForeignKey
 
 
@@ -154,3 +156,46 @@ class Custom(models.Model):
 
     def get_total_item_price(self):
         return self.cpu.price + self.gpu.price + self.ram.price
+
+
+class Pcdes(models.Model):
+    des1 = CharField(max_length=200, null=True, blank=True)
+    des2 = CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return self.des1
+
+
+class Pcprice(models.Model):
+    name = CharField(max_length=500, null=True, blank=True)
+    price = models.FloatField()
+    qua = models.IntegerField()
+    ava = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Pcpart(models.Model):
+    name = CharField(max_length=50, null=True, blank=True)
+    wifi = models.BooleanField(default=True)
+    blutooth = models.BooleanField(default=True)
+    vr = models.BooleanField(default=True)
+    stream = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Gamingpc(models.Model):
+    name = CharField(max_length=100, null=True, blank=True)
+    cpu = CharField(max_length=100, null=True, blank=True)
+    gpu = CharField(max_length=100, null=True, blank=True)
+    ram = CharField(max_length=100, null=True, blank=True)
+    des = ForeignKey(Pcdes, on_delete=models.SET_NULL, blank=True, null=True)
+    price = ForeignKey(Pcprice, on_delete=models.SET_NULL,
+                       blank=True, null=True)
+    part = ForeignKey(Pcpart, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
