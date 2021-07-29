@@ -1,8 +1,11 @@
+from django.contrib.contenttypes import fields
+from django.db import models
 from rest_framework import serializers
-# Register serializer
+from generic_relations.relations import GenericRelatedField
 from va.models import UserAccount
 from va.models import Post
-from va.models import (Cpu, Gpu, Ram, Custom, Gamingpc, Pcpart, Pcprice, Pcdes)
+from va.models import (Cpu, Gpu, Ram, OrderItem, Custom,
+                       Gamingpc, Pcpart, Pcprice, Pcdes)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -35,19 +38,36 @@ class postSerializer(serializers.ModelSerializer):
 class cpuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cpu
-        fields = ('id', 'specs', 'title', 'slug')
+        fields = ('id', 'specs', 'title', 'slug', 'price')
 
 
 class gpuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gpu
-        fields = ('id', 'specs', 'title', 'slug')
+        fields = ('id', 'specs', 'title', 'slug', 'price')
 
 
 class ramSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ram
-        fields = ('id', 'specs', 'title', 'slug')
+        fields = ('id', 'specs', 'title', 'slug', 'price')
+
+
+class orderitemSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    content_object = GenericRelatedField({
+        Cpu: cpuSerializer(),
+        Gpu: gpuSerializer(),
+        Ram: ramSerializer(),
+    })
+
+    class Meta:
+        model = OrderItem
+        fields = ('id', 'user', 'content_object',)
+
+    def get_user(self, obj):
+        return UserSerializer(obj.user).data
 
 
 class OrderSerializer(serializers.ModelSerializer):

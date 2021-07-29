@@ -93,12 +93,6 @@ class OrderItem(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    # item = models.ForeignKey(
-    #     Cpu, on_delete=models.CASCADE, blank=True, null=True)
-    # product = models.ForeignKey(
-    #     Gpu, on_delete=models.CASCADE, blank=True, null=True)
-    # product2 = models.ForeignKey(
-    #     Ram, on_delete=models.CASCADE, blank=True, null=True)
     quantity = models.IntegerField(default=1)
 
     def __str__(self):

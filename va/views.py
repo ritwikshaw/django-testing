@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core import serializers
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from itertools import chain
 from django.shortcuts import get_object_or_404
@@ -27,6 +28,7 @@ from va.serializers import (
     UserSerializer,
     OrderSerializer,
     gamingpcSerializer,
+    orderitemSerializer,
 )
 
 
@@ -91,8 +93,10 @@ class SearchView(APIView):
                     reverse=True)
         self.count = len(qs)  # since qs is actually a list
         for q in qs:
+            print(q)
             order_item_qs = OrderItem.objects.filter(
                 object_id=q.id,
+                content_type=ContentType.objects.get_for_model(q).id,
                 user=request.user,
             )
             if order_item_qs.exists():
@@ -108,6 +112,12 @@ class SearchView(APIView):
 
         return JsonResponse(serializers.serialize('json', qs), safe=False)
         # return Response(status=HTTP_200_OK)
+
+
+class GetorderView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = OrderItem.objects.all()
+    serializer_class = orderitemSerializer
 
 
 class CreateView(APIView):
